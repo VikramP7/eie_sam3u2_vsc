@@ -91,7 +91,7 @@ void UserApp1Initialize(void)
 {
   HEARTBEAT_OFF();
 
-    /* If good initialization, set state to Idle */
+  /* If good initialization, set state to Idle */
   if (1)
   {
     UserApp1_pfStateMachine = UserApp1SM_Idle;
