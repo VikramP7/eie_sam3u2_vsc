@@ -1,5 +1,5 @@
 /*!*********************************************************************************************************************
-@file user_app1.c                                                                
+@file user_app1.c
 @brief User's tasks / applications are written here.  This description
 should be replaced by something specific to the task.
 
@@ -44,35 +44,32 @@ Global variable definitions with scope across entire project.
 All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
-volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
-
+volatile u32 G_u32UserApp1Flags; /*!< @brief Global state flags */
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
-extern volatile u32 G_u32SystemTime1ms;                   /*!< @brief From main.c */
-extern volatile u32 G_u32SystemTime1s;                    /*!< @brief From main.c */
-extern volatile u32 G_u32SystemFlags;                     /*!< @brief From main.c */
-extern volatile u32 G_u32ApplicationFlags;                /*!< @brief From main.c */
-
+extern volatile u32 G_u32SystemTime1ms;    /*!< @brief From main.c */
+extern volatile u32 G_u32SystemTime1s;     /*!< @brief From main.c */
+extern volatile u32 G_u32SystemFlags;      /*!< @brief From main.c */
+extern volatile u32 G_u32ApplicationFlags; /*!< @brief From main.c */
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_<type>" and be declared as static.
 ***********************************************************************************************************************/
-static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
-//static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
-
+static fnCode_type UserApp1_pfStateMachine; /*!< @brief The state machine function pointer */
+// static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
 
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/*! @publicsection */                                                                                            
+/*! @publicsection */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/*! @protectedsection */                                                                                            
+/*! @protectedsection */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
 /*!--------------------------------------------------------------------------------------------------------------------
@@ -92,8 +89,10 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  /* If good initialization, set state to Idle */
-  if( 1 )
+  HEARTBEAT_OFF();
+
+    /* If good initialization, set state to Idle */
+  if (1)
   {
     UserApp1_pfStateMachine = UserApp1SM_Idle;
   }
@@ -105,7 +104,6 @@ void UserApp1Initialize(void)
 
 } /* end UserApp1Initialize() */
 
-  
 /*!----------------------------------------------------------------------------------------------------------------------
 @fn void UserApp1RunActiveState(void)
 
@@ -127,11 +125,9 @@ void UserApp1RunActiveState(void)
 
 } /* end UserApp1RunActiveState */
 
-
 /*------------------------------------------------------------------------------------------------------------------*/
-/*! @privatesection */                                                                                            
+/*! @privatesection */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
 
 /**********************************************************************************************************************
 State Machine Function Definitions
@@ -140,19 +136,37 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-    
+  static u16 u16Counter = U16_COUNTER_PERIOD_MS;
+  static bool hbLightOn = FALSE;
+
+  // decrment counter every function call
+  u16Counter--;
+  if (u16Counter == 0)
+  {
+    // reset timer
+    u16Counter = U16_COUNTER_PERIOD_MS;
+
+    // turn on HB if its off
+    if (!hbLightOn)
+    {
+      HEARTBEAT_ON();
+      hbLightOn = TRUE;
+    }
+    else
+    {
+      HEARTBEAT_OFF();
+      hbLightOn = FALSE;
+    }
+    // turn on HB if its on
+  }
 } /* end UserApp1SM_Idle() */
-     
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
-static void UserApp1SM_Error(void)          
+static void UserApp1SM_Error(void)
 {
-  
+
 } /* end UserApp1SM_Error() */
-
-
-
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* End of File                                                                                                        */
