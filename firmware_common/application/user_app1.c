@@ -91,6 +91,10 @@ void UserApp1Initialize(void)
 {
   HEARTBEAT_OFF();
 
+  LedOn(BLUE0);
+  LedBlink(GREEN1, LED_1HZ);
+  LedPWM(RED2, LED_PWM_10);
+
   /* If good initialization, set state to Idle */
   if (1)
   {
