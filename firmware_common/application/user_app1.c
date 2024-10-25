@@ -136,29 +136,36 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-  static u16 u16Counter = U16_COUNTER_PERIOD_MS;
-  static bool hbLightOn = FALSE;
+  static u8 aau8Colour[][3] = {{RED0, 0xff, 0xff},     /*red*/
+                               {RED0, GREEN0, 0xff},   /*yellow*/
+                               {0xff, GREEN0, 0xff},   /*green*/
+                               {0xff, GREEN0, BLUE0},  /*cyan*/
+                               {0xff, 0xff, BLUE0},    /*blue*/
+                               {RED0, 0xff, BLUE0},    /*purple*/
+                               {RED0, GREEN0, BLUE0}}; /*white*/
+  static u8 u8ButtonClickCounter = 0;
 
-  // decrment counter every function call
-  u16Counter--;
-  if (u16Counter == 0)
+  if (WasButtonPressed(BUTTON0))
   {
-    // reset timer
-    u16Counter = U16_COUNTER_PERIOD_MS;
-
-    // turn on HB if its off
-    if (!hbLightOn)
+    ButtonAcknowledge(BUTTON0);
+    u8ButtonClickCounter++;
+    for (u8 i = 0; i < (U8_TOTAL_LEDS - 1); i++)
     {
-      HEARTBEAT_ON();
-      hbLightOn = TRUE;
+      LedOff((LedNameType)i);
     }
-    else
+    for (u8 ledPos = 0; ledPos < 4; ledPos++)
     {
-      HEARTBEAT_OFF();
-      hbLightOn = FALSE;
+      if (u8ButtonClickCounter & (0x01 << ledPos))
+      {
+        for (u8 i = 0; i < 3; i++)
+        {
+          LedOn(aau8Colour[6][i] + 3 - ledPos);
+        }
+      }
     }
-    // turn on HB if its on
+    u8ButtonClickCounter %= 16;
   }
+
 } /* end UserApp1SM_Idle() */
 
 /*-------------------------------------------------------------------------------------------------------------------*/
