@@ -144,7 +144,11 @@ static void UserApp1SM_Idle(void)
                                {RED0, 0xff, BLUE0},    /*purple*/
                                {RED0, GREEN0, BLUE0}}; /*white*/
   static u8 u8ButtonClickCounter = 0;
+  static bool bLed1Flashing = FALSE;
+  static LedRateType aeBlinkRate[] = {LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ};
+  static u8 u8BlinkRateIndex = 0;
 
+  // Button 0 controlling 3-bit binary counter in yellow lights
   if (WasButtonPressed(BUTTON0))
   {
     ButtonAcknowledge(BUTTON0);
@@ -153,17 +157,44 @@ static void UserApp1SM_Idle(void)
     {
       LedOff((LedNameType)i);
     }
-    for (u8 ledPos = 0; ledPos < 4; ledPos++)
+    for (u8 ledPos = 0; ledPos < 3; ledPos++)
     {
       if (u8ButtonClickCounter & (0x01 << ledPos))
       {
-        for (u8 i = 0; i < 3; i++)
+        for (u8 i = 0; i < 3; i++) // for rbg
         {
-          LedOn(aau8Colour[6][i] + 3 - ledPos);
+          if (aau8Colour[6][i]) // 6 is for white
+          {
+            LedOn(aau8Colour[6][i] + 2 - ledPos);
+          }
         }
       }
     }
-    u8ButtonClickCounter %= 16;
+    u8ButtonClickCounter %= 8;
+  }
+
+  // button 1 held for two seconds starts flashing
+  if (IsButtonHeld(BUTTON1, 2000))
+  {
+    if (!bLed1Flashing)
+    {
+      u8BlinkRateIndex = 0;
+      LedBlink(RED0, aeBlinkRate[u8BlinkRateIndex]);
+      bLed1Flashing = TRUE;
+    }
+    else
+    {
+      LedOff(RED0);
+      bLed1Flashing = FALSE;
+    }
+  }
+
+  if (WasButtonPressed(BUTTON1) && bLed1Flashing)
+  {
+    ButtonAcknowledge(BUTTON1);
+    u8BlinkRateIndex++;
+    u8BlinkRateIndex %= sizeof(aeBlinkRate) / sizeof(LedRateType);
+    LedBlink(RED0, aeBlinkRate[u8BlinkRateIndex]);
   }
 
 } /* end UserApp1SM_Idle() */
