@@ -89,8 +89,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  HEARTBEAT_OFF();
-
+  PWMAudioOn(BUZZER1);
   /* If good initialization, set state to Idle */
   if (1)
   {
@@ -136,29 +135,61 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-  static u16 u16Counter = U16_COUNTER_PERIOD_MS;
-  static bool hbLightOn = FALSE;
+  static u8 u8BPM = 60;
+  static u16 u16notes[] = {F4, G4S, F4, F4, A4S, F4, D4S, F4, C5, F4, F4, C5S, C5, G4S, F4, C5, F5, F4, D4S, D4S, C4, G4, F4};
+  static u8 u8noteLengths[] = {4, 3, 2, 1, 2, 2, 2, 4, 3, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 6};
+  // static u16 u16notes[] = {C4, D4, E4, F4, G4, A4, B4, C5};
+  // static u8 u8noteLengths[] = {8, 8, 8, 8, 8, 8, 8, 8};
+  static u8 u8noteIndex = 0;
+  static u16 u16timeOnNotems = 0;
+  static bool bmute = FALSE;
 
-  // decrment counter every function call
-  u16Counter--;
-  if (u16Counter == 0)
+  // checks if we've played that note for long enough now
+  if (u16timeOnNotems >= ((7500 * u8noteLengths[u8noteIndex]) / u8BPM))
   {
-    // reset timer
-    u16Counter = U16_COUNTER_PERIOD_MS;
-
-    // turn on HB if its off
-    if (!hbLightOn)
+    u16timeOnNotems = 0;
+    PWMAudioOff(BUZZER1);
+    u8noteIndex++;
+    u8noteIndex %= (sizeof(u16notes) / sizeof(u16));
+  }
+  // set freq for current note if note switch
+  if (u16timeOnNotems == 10)
+  {
+    PWMAudioSetFrequency(BUZZER1, u16notes[u8noteIndex]);
+    if (!bmute)
     {
-      HEARTBEAT_ON();
-      hbLightOn = TRUE;
+      PWMAudioOn(BUZZER1);
+    }
+  }
+
+  // check is the mute button was toggled
+  if (WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    if (bmute)
+    {
+      PWMAudioOn(BUZZER1);
+      bmute = FALSE;
     }
     else
     {
-      HEARTBEAT_OFF();
-      hbLightOn = FALSE;
+      PWMAudioOff(BUZZER1);
+      bmute = TRUE;
     }
-    // turn on HB if its on
   }
+
+  // check is the mute button was toggled
+  if (WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    u8BPM += 20;
+    if (u8BPM >= 130)
+    {
+      u8BPM = 40;
+    }
+  }
+  // increases the total time the note has been on
+  u16timeOnNotems++;
 } /* end UserApp1SM_Idle() */
 
 /*-------------------------------------------------------------------------------------------------------------------*/
