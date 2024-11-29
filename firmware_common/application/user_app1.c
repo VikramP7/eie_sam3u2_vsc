@@ -44,6 +44,7 @@ Global variable definitions with scope across entire project.
 All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
+static u8 UserApp1_au8UserInputBuffer[U16_USER1_INPUT_BUFFER_SIZE];
 volatile u32 G_u32UserApp1Flags; /*!< @brief Global state flags */
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -52,6 +53,9 @@ extern volatile u32 G_u32SystemTime1ms;    /*!< @brief From main.c */
 extern volatile u32 G_u32SystemTime1s;     /*!< @brief From main.c */
 extern volatile u32 G_u32SystemFlags;      /*!< @brief From main.c */
 extern volatile u32 G_u32ApplicationFlags; /*!< @brief From main.c */
+
+extern u8 G_au8DebugScanfBuffer[DEBUG_SCANF_BUFFER_SIZE]; // From debug.c
+extern u8 G_u8DebugScanfCharCount;                        // From debug.c
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
@@ -89,9 +93,13 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  HEARTBEAT_OFF();
+  /*Initialize the input buffer*/
+  for (u8 i = 0; i < U16_USER1_INPUT_BUFFER_SIZE; i++)
+  {
+    UserApp1_au8UserInputBuffer[i] = '\0';
+  }
 
-    /* If good initialization, set state to Idle */
+  /* If good initialization, set state to Idle */
   if (1)
   {
     UserApp1_pfStateMachine = UserApp1SM_Idle;
@@ -136,29 +144,23 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-  static u16 u16Counter = U16_COUNTER_PERIOD_MS;
-  static bool hbLightOn = FALSE;
-
-  // decrment counter every function call
-  u16Counter--;
-  if (u16Counter == 0)
+  static u8 au8NumCharsMessage[] = "\n\rCharacters in Buffer: ";
+  static u8 au8BufferMessage[] = "\n\rBuffer contents: \n\r";
+  u8 u8CharCount;
+  /* Print message with number of characters in scanf buffer if Button0 was pressed*/
+  if (WasButtonPressed(BUTTON0))
   {
-    // reset timer
-    u16Counter = U16_COUNTER_PERIOD_MS;
+    ButtonAcknowledge(BUTTON0);
 
-    // turn on HB if its off
-    if (!hbLightOn)
-    {
-      HEARTBEAT_ON();
-      hbLightOn = TRUE;
-    }
-    else
-    {
-      HEARTBEAT_OFF();
-      hbLightOn = FALSE;
-    }
-    // turn on HB if its on
+    /*Read the scanf buffer to local buffer; capture how many characters were put in buffer*/
+    u8CharCount = DebugScanf(UserApp1_au8UserInputBuffer);
+    UserApp1_au8UserInputBuffer[u8CharCount] = '\0';
+
+    DebugPrintf(au8BufferMessage);
+    DebugPrintf(UserApp1_au8UserInputBuffer);
+    DebugLineFeed();
   }
+
 } /* end UserApp1SM_Idle() */
 
 /*-------------------------------------------------------------------------------------------------------------------*/
