@@ -89,9 +89,11 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  HEARTBEAT_OFF();
+  LcdClearScreen();
+  PixelAddressType sTargetPixel = {32, 64};
+  LcdSetPixel(&sTargetPixel);
 
-    /* If good initialization, set state to Idle */
+  /* If good initialization, set state to Idle */
   if (1)
   {
     UserApp1_pfStateMachine = UserApp1SM_Idle;
@@ -136,29 +138,20 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-  static u16 u16Counter = U16_COUNTER_PERIOD_MS;
-  static bool hbLightOn = FALSE;
-
-  // decrment counter every function call
-  u16Counter--;
-  if (u16Counter == 0)
+  static u8 firstTime = 1;
+  if (firstTime)
   {
-    // reset timer
-    u16Counter = U16_COUNTER_PERIOD_MS;
-
-    // turn on HB if its off
-    if (!hbLightOn)
-    {
-      HEARTBEAT_ON();
-      hbLightOn = TRUE;
-    }
-    else
-    {
-      HEARTBEAT_OFF();
-      hbLightOn = FALSE;
-    }
-    // turn on HB if its on
+    LcdClearScreen();
+    firstTime = 0;
   }
+  PixelBlockType sTestImage;
+  sTestImage.u16RowStart = 0;
+  sTestImage.u16ColumnStart = 0;
+  sTestImage.u16RowSize = 8;
+  sTestImage.u16ColumnSize = 8;
+  u8 aau8FunnyImage[8][1] = {{0x0}, {0x6}, {0xc}, {0x18}, {0x10}, {0x15}, {0x11}, {0xe}};
+
+  LcdLoadBitmap(&aau8FunnyImage[0][0], &sTestImage);
 } /* end UserApp1SM_Idle() */
 
 /*-------------------------------------------------------------------------------------------------------------------*/
