@@ -90,8 +90,6 @@ Promises:
 void UserApp1Initialize(void)
 {
   LcdClearScreen();
-  PixelAddressType sTargetPixel = {32, 64};
-  LcdSetPixel(&sTargetPixel);
 
   /* If good initialization, set state to Idle */
   if (1)
