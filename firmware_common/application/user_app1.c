@@ -91,7 +91,7 @@ void UserApp1Initialize(void)
 {
   HEARTBEAT_OFF();
 
-    /* If good initialization, set state to Idle */
+  /* If good initialization, set state to Idle */
   if (1)
   {
     UserApp1_pfStateMachine = UserApp1SM_Idle;
@@ -136,29 +136,7 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-  static u16 u16Counter = U16_COUNTER_PERIOD_MS;
-  static bool hbLightOn = FALSE;
 
-  // decrment counter every function call
-  u16Counter--;
-  if (u16Counter == 0)
-  {
-    // reset timer
-    u16Counter = U16_COUNTER_PERIOD_MS;
-
-    // turn on HB if its off
-    if (!hbLightOn)
-    {
-      HEARTBEAT_ON();
-      hbLightOn = TRUE;
-    }
-    else
-    {
-      HEARTBEAT_OFF();
-      hbLightOn = FALSE;
-    }
-    // turn on HB if its on
-  }
 } /* end UserApp1SM_Idle() */
 
 /*-------------------------------------------------------------------------------------------------------------------*/

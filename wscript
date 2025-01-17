@@ -233,6 +233,7 @@ def build(ctx):
         "firmware_common/bsp",
         "firmware_common/drivers",
         "firmware_common/application",
+        "firmware_dotmatrix/application",
     ]
 
     # Files specific to the ascii and dot matrix boards.
