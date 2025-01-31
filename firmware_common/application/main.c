@@ -80,8 +80,11 @@ int main(void)
 #ifdef EIE_ASCII
 #endif /* EIE_ASCII */
 
-#if defined(EIE_DOTMATRIX) && !defined(EIE_NO_CAPTOUCH)
+#if defined(EIE_DOTMATRIX)
+  BoardTestInitialize();
+#if !defined(EIE_NO_CAPTOUCH)
   CapTouchInitialize();
+#endif /* EIE_NO_CAPTOUCH) */
 #endif /* EIE_DOTMATRIX */
 
   /* Application initialization */
@@ -120,8 +123,11 @@ int main(void)
 #ifdef EIE_ASCII
 #endif /* EIE_ASCII */
 
-#if defined(EIE_DOTMATRIX) && !defined(EIE_NO_CAPTOUCH)
+#if defined(EIE_DOTMATRIX)
+    BoardTestRunActiveState();
+#if !defined(EIE_NO_CAPTOUCH)
     CapTouchRunActiveState();
+#endif /* EIE_NO_CAPTOUCH */
 #endif /* EIE_DOTMATRIX */
 
     /* Applications */
@@ -131,9 +137,9 @@ int main(void)
     UserApp3RunActiveState();
 
     /* System sleep */
-    // HEARTBEAT_OFF();
+    HEARTBEAT_OFF();
     SystemSleep();
-    // HEARTBEAT_ON();
+    HEARTBEAT_ON();
 
   } /* end while(1) main super loop */
 

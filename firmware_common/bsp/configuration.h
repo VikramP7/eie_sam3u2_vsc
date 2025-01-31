@@ -1,11 +1,11 @@
 /*!*********************************************************************************************************************
-@file configuration.h      
-@brief Main configuration header file for project.  
+@file configuration.h
+@brief Main configuration header file for project.
 
-This file bridges many of the generic features of the firmware to the 
+This file bridges many of the generic features of the firmware to the
 specific features of the design. The definitions should be updated
-to match the target hardware.  
- 
+to match the target hardware.
+
 Bookmarks:
 !!!!! External module peripheral assignments
 ##### UART peripheral board-specific parameters
@@ -22,24 +22,30 @@ $$$$$ SPI peripheral board-specific parameters
 /**********************************************************************************************************************
 Runtime switches
 ***********************************************************************************************************************/
-//#define STARTUP_SOUND               /*!< Define to include buzzer sound on startup */
+// #define STARTUP_SOUND               /*!< Define to include buzzer sound on startup */
 
-//#define EIE_DOTMATRIX_R01           /*!< Use with MPGL2-EHDW-01 revision board */
-
+// #define EIE_DOTMATRIX_R01           /*!< Use with MPGL2-EHDW-01 revision board */
 
 /**********************************************************************************************************************
 Type Definitions
 **********************************************************************************************************************/
 
-/*! 
+/*!
 @enum PeripheralType
 @brief Short names used to identify peripherals in their configuration structs.
 
 This provides self-documentation when indexing peripherals and when assigning
 better names for devices that make use of the peripherals.
 */
-typedef enum {SPI0, UART, USART0, USART1, USART2, USART3} PeripheralType;
-
+typedef enum
+{
+    SPI0,
+    UART,
+    USART0,
+    USART1,
+    USART2,
+    USART3
+} PeripheralType;
 
 /**********************************************************************************************************************
 Includes
@@ -86,7 +92,7 @@ Includes
 #include "ant.h"
 #include "ant_api.h"
 #include "buttons.h"
-#include "leds.h" 
+#include "leds.h"
 #include "messaging.h"
 #include "timer.h"
 
@@ -103,131 +109,124 @@ Includes
 #include "user_app1.h"
 #include "user_app2.h"
 #include "user_app3.h"
-
+#include "dotmatrix_board_test.h"
 
 /**********************************************************************************************************************
 !!!!! External device peripheral assignments
 ***********************************************************************************************************************/
 
 /* Peripheral assignments */
-#define BLADE_UART                  UART
-#define DEBUG_UART                  USART0
-#define ANT_SPI                     USART2
-#define BLADE_SPI                   SPI0
-#define BLADE_I2C                   TWI0
+#define BLADE_UART UART
+#define DEBUG_UART USART0
+#define ANT_SPI USART2
+#define BLADE_SPI SPI0
+#define BLADE_I2C TWI0
 
 #ifdef EIE_ASCII
-#define LCD_I2C                     TWI0
-#define SD_SSP                      USART1
+#define LCD_I2C TWI0
+#define SD_SSP USART1
 #endif
 
 #ifdef EIE_DOTMATRIX
-#define LCD_SPI                     USART1
+#define LCD_SPI USART1
 #endif
 
-
 /* Global status flags for SPI peripherals */
-#define BLADE_SPI_FLAGS             G_u32Spi0ApplicationFlags  /*!< @brief Assigns the correct global Application Flags to a self-documenting symbol */
-#define SD_SSP_FLAGS                G_u32Ssp1ApplicationFlags  /*!< @brief Assigns the correct global Application Flags to a self-documenting symbol */
-#define ANT_SSP_FLAGS               G_u32Ssp2ApplicationFlags  /*!< @brief Assigns the correct global Application Flags to a self-documenting symbol */
-
+#define BLADE_SPI_FLAGS G_u32Spi0ApplicationFlags /*!< @brief Assigns the correct global Application Flags to a self-documenting symbol */
+#define SD_SSP_FLAGS G_u32Ssp1ApplicationFlags    /*!< @brief Assigns the correct global Application Flags to a self-documenting symbol */
+#define ANT_SSP_FLAGS G_u32Ssp2ApplicationFlags   /*!< @brief Assigns the correct global Application Flags to a self-documenting symbol */
 
 /*! @cond DOXYGEN_EXCLUDE */
 /* %UART% Configuration */
 
 /* Debug UART Peripheral Allocation (USART0) */
-#define USART0_US_CR_INIT           DEBUG_UART_US_CR_INIT
-#define USART0_US_MR_INIT           DEBUG_UART_US_MR_INIT
-#define USART0_US_IER_INIT          DEBUG_UART_US_IER_INIT
-#define USART0_US_IDR_INIT          DEBUG_UART_US_IDR_INIT
-#define USART0_US_BRGR_INIT         DEBUG_UART_US_BRGR_INIT
+#define USART0_US_CR_INIT DEBUG_UART_US_CR_INIT
+#define USART0_US_MR_INIT DEBUG_UART_US_MR_INIT
+#define USART0_US_IER_INIT DEBUG_UART_US_IER_INIT
+#define USART0_US_IDR_INIT DEBUG_UART_US_IDR_INIT
+#define USART0_US_BRGR_INIT DEBUG_UART_US_BRGR_INIT
 
-#define UART0_IRQHandler            USART0_IrqHandler
-#define DEBUG_UART_PERIPHERAL       AT91C_ID_US0
+#define UART0_IRQHandler USART0_IrqHandler
+#define DEBUG_UART_PERIPHERAL AT91C_ID_US0
 
 /* Blade UART Peripheral Allocation (UART) */
-#define UART_US_CR_INIT             BLADE_UART_US_CR_INIT
-#define UART_US_MR_INIT             BLADE_UART_US_MR_INIT
-#define UART_US_IER_INIT            BLADE_UART_US_IER_INIT
-#define UART_US_IDR_INIT            BLADE_UART_US_IDR_INIT
-#define UART_US_BRGR_INIT           BLADE_UART_US_BRGR_INIT
+#define UART_US_CR_INIT BLADE_UART_US_CR_INIT
+#define UART_US_MR_INIT BLADE_UART_US_MR_INIT
+#define UART_US_IER_INIT BLADE_UART_US_IER_INIT
+#define UART_US_IDR_INIT BLADE_UART_US_IDR_INIT
+#define UART_US_BRGR_INIT BLADE_UART_US_BRGR_INIT
 
-#define UART_IRQHandler             DBGU_IrqHandler
-#define BLADE_UART_PERIPHERAL       AT91C_ID_DBGU
-
+#define UART_IRQHandler DBGU_IrqHandler
+#define BLADE_UART_PERIPHERAL AT91C_ID_DBGU
 
 /* %SPI% Configuration */
 
 /* %SPI% Blade SPI Peripheral Allocation (SPI0) */
-#define BLADE_BASE_PORT             AT91C_BASE_PIOA
-#define BLADE_CS_PIN                PA_16_BLADE_CS
-#define BLADE_SPI_FLAGS             G_u32Spi0ApplicationFlags
-#define BLADE_SPI_PERIPHERAL        AT91C_ID_SPI0
+#define BLADE_BASE_PORT AT91C_BASE_PIOA
+#define BLADE_CS_PIN PA_16_BLADE_CS
+#define BLADE_SPI_FLAGS G_u32Spi0ApplicationFlags
+#define BLADE_SPI_PERIPHERAL AT91C_ID_SPI0
 
-#define SPI0_CR_INIT                BLADE_SPI_CR_INIT
-#define SPI0_MR_INIT                BLADE_SPI_MR_INIT
-#define SPI0_IER_INIT               BLADE_SPI_IER_INIT
-#define SPI0_IDR_INIT               BLADE_SPI_IDR_INIT
-#define SPI0_CSR0_INIT              BLADE_SPI_CSR0_INIT
-#define SPI0_CSR1_INIT              BLADE_SPI_CSR1_INIT
-#define SPI0_CSR2_INIT              BLADE_SPI_CSR2_INIT
-#define SPI0_CSR3_INIT              BLADE_SPI_CSR3_INIT
+#define SPI0_CR_INIT BLADE_SPI_CR_INIT
+#define SPI0_MR_INIT BLADE_SPI_MR_INIT
+#define SPI0_IER_INIT BLADE_SPI_IER_INIT
+#define SPI0_IDR_INIT BLADE_SPI_IDR_INIT
+#define SPI0_CSR0_INIT BLADE_SPI_CSR0_INIT
+#define SPI0_CSR1_INIT BLADE_SPI_CSR1_INIT
+#define SPI0_CSR2_INIT BLADE_SPI_CSR2_INIT
+#define SPI0_CSR3_INIT BLADE_SPI_CSR3_INIT
 
-#define SPI0_IRQHandler             SPI0_IrqHandler
-
+#define SPI0_IRQHandler SPI0_IrqHandler
 
 /* %SSP% Configuration */
 
 #ifdef EIE_ASCII
 /* SD SPI Peripheral Allocation (USART1) */
-#define SD_BASE_PORT                AT91C_BASE_PIOA
-#define SD_CS_PIN                   PA_08_SD_CS_MCDA3
-#define USART1_US_CR_INIT           SD_SPI_US_CR_INIT
-#define USART1_US_MR_INIT           SD_SPI_US_MR_INIT
-#define USART1_US_IER_INIT          SD_SPI_US_IER_INIT
-#define USART1_US_IDR_INIT          SD_SPI_US_IDR_INIT
-#define USART1_US_BRGR_INIT         SD_SPI_US_BRGR_INIT
+#define SD_BASE_PORT AT91C_BASE_PIOA
+#define SD_CS_PIN PA_08_SD_CS_MCDA3
+#define USART1_US_CR_INIT SD_SPI_US_CR_INIT
+#define USART1_US_MR_INIT SD_SPI_US_MR_INIT
+#define USART1_US_IER_INIT SD_SPI_US_IER_INIT
+#define USART1_US_IDR_INIT SD_SPI_US_IDR_INIT
+#define USART1_US_BRGR_INIT SD_SPI_US_BRGR_INIT
 
-#define SSP1_IRQHandler             USART1_IrqHandler
+#define SSP1_IRQHandler USART1_IrqHandler
 #endif /* EIE_ASCII */
 
 #ifdef EIE_DOTMATRIX
 /* %SSP% Configuration */
 /* LCD SPI Peripheral Allocation (USART1) */
-#define LCD_BASE_PORT               AT91C_BASE_PIOB
-#define LCD_CS_PIN                  PB_12_LCD_CS
-#define USART1_US_CR_INIT           LCD_US_CR_INIT
-#define USART1_US_MR_INIT           LCD_US_MR_INIT
-#define USART1_US_IER_INIT          LCD_US_IER_INIT
-#define USART1_US_IDR_INIT          LCD_US_IDR_INIT
-#define USART1_US_BRGR_INIT         LCD_US_BRGR_INIT
+#define LCD_BASE_PORT AT91C_BASE_PIOB
+#define LCD_CS_PIN PB_12_LCD_CS
+#define USART1_US_CR_INIT LCD_US_CR_INIT
+#define USART1_US_MR_INIT LCD_US_MR_INIT
+#define USART1_US_IER_INIT LCD_US_IER_INIT
+#define USART1_US_IDR_INIT LCD_US_IDR_INIT
+#define USART1_US_BRGR_INIT LCD_US_BRGR_INIT
 
-#define SSP1_IRQHandler             USART1_IrqHandler
+#define SSP1_IRQHandler USART1_IrqHandler
 #endif /* EIE_DOTMATRIX */
 
-
 /* ANT SPI Peripheral Allocation (USART2) */
-#define ANT_SPI_CS_GPIO             AT91C_BASE_PIOB
-#define ANT_SPI_CS_PIN              PB_22_ANT_USPI2_CS
-#define USART2_US_CR_INIT           ANT_SPI_US_CR_INIT
-#define USART2_US_MR_INIT           ANT_SPI_US_MR_INIT
-#define USART2_US_IER_INIT          ANT_SPI_US_IER_INIT
-#define USART2_US_IDR_INIT          ANT_SPI_US_IDR_INIT
-#define USART2_US_BRGR_INIT         ANT_SPI_US_BRGR_INIT
+#define ANT_SPI_CS_GPIO AT91C_BASE_PIOB
+#define ANT_SPI_CS_PIN PB_22_ANT_USPI2_CS
+#define USART2_US_CR_INIT ANT_SPI_US_CR_INIT
+#define USART2_US_MR_INIT ANT_SPI_US_MR_INIT
+#define USART2_US_IER_INIT ANT_SPI_US_IER_INIT
+#define USART2_US_IDR_INIT ANT_SPI_US_IDR_INIT
+#define USART2_US_BRGR_INIT ANT_SPI_US_BRGR_INIT
 
-#define SSP2_IRQHandler             USART2_IrqHandler
-
+#define SSP2_IRQHandler USART2_IrqHandler
 
 /* %I2C% Configuration */
 
 /* EiE I2C (TWI0) */
-#define TWI0_CR_INIT                EIE_TWI_CR_INIT
-#define TWI0_MMR_INIT               EIE_TWI_MMR_INIT
-#define TWI0_CWGR_INIT              EIE_TWI_CWGR_INIT
-#define TWI0_IER_INIT               EIE_TWI_IER_INIT
+#define TWI0_CR_INIT EIE_TWI_CR_INIT
+#define TWI0_MMR_INIT EIE_TWI_MMR_INIT
+#define TWI0_CWGR_INIT EIE_TWI_CWGR_INIT
+#define TWI0_IER_INIT EIE_TWI_IER_INIT
 
-#define TWI0_IRQHandler             Twi0_IrqHandler
-
+#define TWI0_IRQHandler Twi0_IrqHandler
 
 /*! @endcond */
 /***********************************************************************************************************************
@@ -285,7 +284,7 @@ Debug is used for the terminal (serial: 115.2k, 8-N-1) debugging interface.
     24 [0] "
 
     23 [0] INVDATA data is not inverted
-    22 [0] VAR_SYNC sync field 
+    22 [0] VAR_SYNC sync field
     21 [0] DSNACK delicious! NACK is sent on ISO line immediately on parity error
     20 [0] INACK NACK generated (N/A for async)
 
@@ -314,7 +313,6 @@ Debug is used for the terminal (serial: 115.2k, 8-N-1) debugging interface.
     01 [0] "
     00 [0] "
 */
-
 
 /* USART Interrupt Enable Register */
 #define DEBUG_UART_US_IER_INIT (u32)0x00000008
@@ -361,9 +359,9 @@ Debug is used for the terminal (serial: 115.2k, 8-N-1) debugging interface.
 */
 
 /* USART Interrupt Disable Register */
-#define DEBUG_UART_US_IDR_INIT (u32)~DEBUG_UART_US_IER_INIT
+#define DEBUG_UART_US_IDR_INIT (u32) ~DEBUG_UART_US_IER_INIT
 
-/* USART Baud Rate Generator Register 
+/* USART Baud Rate Generator Register
 BAUD = MCK / (8(2-OVER)(CD + FP / 8))
 => CD = (MCK / (8(2-OVER)BAUD)) - (FP / 8)
 MCK = 48MHz
@@ -407,7 +405,6 @@ Set FP = 0, CD = 26 = 0x1A
     01 [1] "
     00 [0] "
 */
-
 
 /*----------------------------------------------------------------------------------------------------------------------
 Blade UART Setup
@@ -459,7 +456,7 @@ The Blade UART is used for the daughter board interface (serial: 115.2k, 8-N-1) 
     24 [0] "
 
     23 [0] INVDATA data is not inverted
-    22 [0] VAR_SYNC sync field 
+    22 [0] VAR_SYNC sync field
     21 [0] DSNACK delicious! NACK is sent on ISO line immeidately on parity error
     20 [0] INACK NACK generated (N/A for async)
 
@@ -488,7 +485,6 @@ The Blade UART is used for the daughter board interface (serial: 115.2k, 8-N-1) 
     01 [0] "
     00 [0] "
 */
-
 
 /* USART Interrupt Enable Register */
 #define BLADE_UART_US_IER_INIT (u32)0x00000008
@@ -535,7 +531,7 @@ The Blade UART is used for the daughter board interface (serial: 115.2k, 8-N-1) 
 */
 
 /* USART Interrupt Disable Register */
-#define BLADE_UART_US_IDR_INIT (u32)~BLADE_UART_US_IER_INIT
+#define BLADE_UART_US_IDR_INIT (u32) ~BLADE_UART_US_IER_INIT
 
 /* USART Baud Rate Generator Register
 BAUD = MCK / (8(2-OVER)(CD + FP / 8))
@@ -578,7 +574,6 @@ Set FP = 0, CD = 26
     00 [0] "
 */
 
-
 /*! @endcond */
 /***********************************************************************************************************************
 $$$$$ SPI peripheral board-specific parameters
@@ -586,9 +581,9 @@ $$$$$ SPI peripheral board-specific parameters
 /*! @cond DOXYGEN_EXCLUDE */
 
 /*----------------------------------------------------------------------------------------------------------------------
-Blade SPI Setup 
+Blade SPI Setup
 
-SPI mode to communicate with a Slave device on the Blade connector. 
+SPI mode to communicate with a Slave device on the Blade connector.
 */
 /* SPI Control Register */
 #define BLADE_SPI_CR_INIT (u32)0x00000002
@@ -636,7 +631,7 @@ SPI mode to communicate with a Slave device on the Blade connector.
     17 [0] "
     16 [0] "
 
-    15 - 08 [0] Reserved 
+    15 - 08 [0] Reserved
 
     07 [0] LLB Local Loopback disabled
     06 [0] Reserved
@@ -652,7 +647,7 @@ SPI mode to communicate with a Slave device on the Blade connector.
 /* SPI Interrupt Enable Register */
 #define BLADE_SPI_IER_INIT (u32)0x00000000
 /*
-    31 - 12 [0] Reserved 
+    31 - 12 [0] Reserved
 
     11 [0] Reserved
     10 [0] UNDES not enabled
@@ -671,10 +666,10 @@ SPI mode to communicate with a Slave device on the Blade connector.
 */
 
 /* SPI Interrupt Disable Register  */
-#define BLADE_SPI_IDR_INIT (u32)~BLADE_SPI_IER_INIT
+#define BLADE_SPI_IDR_INIT (u32) ~BLADE_SPI_IER_INIT
 
 /* SPI Baud Rate Generator Register
-BAUD = MCK / SCBR 
+BAUD = MCK / SCBR
 => SCBR = MCK / BAUD
 BAUD desired = 1 Mbps
 => SCBR = 48
@@ -725,7 +720,7 @@ DLYBCT = 4.5 (round up to 5)
     04 [0] "
 
     03 [0] CSAAT CS rises after data tranfer
-    02 [0] CSNAAT CS not active after transfer 
+    02 [0] CSNAAT CS not active after transfer
     01 [0] NCPHA Clock phase leading edge
     00 [1] CPOL Clock polarity high when inactive
 */
@@ -744,7 +739,7 @@ DLYBCT = 4.5 (round up to 5)
 /*----------------------------------------------------------------------------------------------------------------------
 EIE_ASCII ASCII board SD USART Setup in SSP mode
 
-SPI mode to communicate with an SPI SD card. 
+SPI mode to communicate with an SPI SD card.
 */
 /* USART Control Register */
 #define SD_SPI_US_CR_INIT (u32)0x00000050
@@ -821,7 +816,6 @@ SPI mode to communicate with an SPI SD card.
     00 [0] "
 */
 
-
 /* USART Interrupt Enable Register */
 #define SD_SPI_US_IER_INIT (u32)0x00000000
 /*
@@ -867,15 +861,15 @@ SPI mode to communicate with an SPI SD card.
 */
 
 /* USART Interrupt Disable Register  */
-#define SD_SPI_US_IDR_INIT (u32)~SD_SPI_US_IER_INIT
+#define SD_SPI_US_IDR_INIT (u32) ~SD_SPI_US_IER_INIT
 
 /* USART Baud Rate Generator Register
-BAUD = MCK / CD 
+BAUD = MCK / CD
 => CD = MCK / BAUD
 BAUD desired = 1 Mbps
 => CD = 48
 */
-#define SD_SPI_US_BRGR_INIT (u32)0x00000030  
+#define SD_SPI_US_BRGR_INIT (u32)0x00000030
 /*
     31-20 [0] Reserved
 
@@ -905,11 +899,10 @@ BAUD desired = 1 Mbps
     00 [0] "
 */
 
-
 /*----------------------------------------------------------------------------------------------------------------------
 EIE_DOTMATRIX Dot Matrix LCD USART Setup in SSP mode
 
-SPI mode to communicate with an SPI LCD screen. 
+SPI mode to communicate with an SPI LCD screen.
 */
 /* USART Control Register - Page 734 */
 #define LCD_US_CR_INIT (u32)0x00000060
@@ -986,7 +979,6 @@ SPI mode to communicate with an SPI LCD screen.
     00 [0] "
 */
 
-
 /* USART Interrupt Enable Register - Page 741 */
 #define LCD_US_IER_INIT (u32)0x00000000
 /*
@@ -1032,15 +1024,15 @@ SPI mode to communicate with an SPI LCD screen.
 */
 
 /* USART Interrupt Disable Register - Page 743 */
-#define LCD_US_IDR_INIT (u32)~LCD_US_IER_INIT
+#define LCD_US_IDR_INIT (u32) ~LCD_US_IER_INIT
 
 /* USART Baud Rate Generator Register - Page 752
-BAUD = MCK / CD 
+BAUD = MCK / CD
 => CD = MCK / BAUD
 BAUD desired = 1 Mbps
 => CD = 48
 */
-#define LCD_US_BRGR_INIT (u32)0x00000030  /* VERIFY SPI CLOCK! */
+#define LCD_US_BRGR_INIT (u32)0x00000030 /* VERIFY SPI CLOCK! */
 /*
     31-20 [0] Reserved
 
@@ -1070,10 +1062,9 @@ BAUD desired = 1 Mbps
     00 [0] "
 */
 
-
 /*----------------------------------------------------------------------------------------------------------------------
 ANT USART Setup in SSP
-SPI slave mode to communicate with an ANT device. 
+SPI slave mode to communicate with an ANT device.
 */
 /* USART Control Register */
 #define ANT_SPI_US_CR_INIT (u32)0x00000050
@@ -1150,7 +1141,6 @@ SPI slave mode to communicate with an ANT device.
     00 [1] "
 */
 
-
 /* USART Interrupt Enable Register */
 #define ANT_SPI_US_IER_INIT (u32)0x00080000
 /*
@@ -1169,7 +1159,7 @@ SPI slave mode to communicate with an ANT device.
     21 [0] "
     20 [0] "
 
-    19 [1] CTSIC Clear to Send Change interrupt enabled 
+    19 [1] CTSIC Clear to Send Change interrupt enabled
     18 [0] DCDIC Data Carrier Detect Change interrupt not enabled
     17 [0] DSRIC Data Set Ready Change interrupt not enabled
     16 [0] RIIC Ring Inidicator Change interrupt not enabled
@@ -1177,7 +1167,7 @@ SPI slave mode to communicate with an ANT device.
     15 [0] Reserved
     14 [0] "
     13 [0] NACK Non Ack interrupt not enabled
-    12 [0] RXBUFF Reception Buffer Full (PDC) interrupt not enabled 
+    12 [0] RXBUFF Reception Buffer Full (PDC) interrupt not enabled
 
     11 [0] TXBUFE Transmission Buffer Empty (PDC) interrupt not enabled
     10 [0] ITER/UNRE Max number of Repetitions Reached interrupt not enabled
@@ -1187,24 +1177,23 @@ SPI slave mode to communicate with an ANT device.
     07 [0] PARE Parity Error interrupt not enabled
     06 [0] FRAME Framing Error interrupt not enabled
     05 [0] OVRE Overrun Error interrupt not enabled
-    04 [0] ENDTX End of Transmitter Transfer (PDC) interrupt not enabled 
+    04 [0] ENDTX End of Transmitter Transfer (PDC) interrupt not enabled
 
     03 [0] ENDRX End of Receiver Transfer (PDC) interrupt not enabled
     02 [0] RXBRK Break Received interrupt not enabled
     01 [0] TXRDY Transmitter Ready interrupt not enabled YET
-    00 [0] RXRDY Receiver Ready interrupt enabled 
+    00 [0] RXRDY Receiver Ready interrupt enabled
 */
 
 /* USART Interrupt Disable Register */
-#define ANT_SPI_US_IDR_INIT (u32)~ANT_SPI_US_IER_INIT
+#define ANT_SPI_US_IDR_INIT (u32) ~ANT_SPI_US_IER_INIT
 
-/* USART Baud Rate Generator Register 
-!!!!! Not applicable for Slave (note that incoming clock cannot 
+/* USART Baud Rate Generator Register
+!!!!! Not applicable for Slave (note that incoming clock cannot
 exceed MCLK/6 = 8MHz.  To date, ANT devices communicate at 500kHz
 or 2MHz, so no issues.
 */
-#define ANT_SPI_US_BRGR_INIT (u32)0x00000000  
-
+#define ANT_SPI_US_BRGR_INIT (u32)0x00000000
 
 /*! @endcond */
 /***********************************************************************************************************************
@@ -1238,7 +1227,7 @@ Dot Matrix: Blade and R01 EIE_DOTMATRIX accelerometer
 #define EIE_TWI_MMR_INIT (u32)0x00000000
 /*
     31-24 [0] Reserved
-    
+
     23 [0] Reserved
     22 [0] DADR - device Slave address - start with zero
     21 [0] "
@@ -1263,18 +1252,18 @@ Dot Matrix: Blade and R01 EIE_DOTMATRIX accelerometer
 */
 
 /* Clock Wave Generator Register */
-/* 
+/*
     Calculation:
         T_low = ((CLDIV * (2^CKDIV))+4) * T_MCK
         T_high = ((CHDIV * (2^CKDIV))+4) * T_MCK
 
         T_MCK - period of master clock = 1/(48 MHz)
         T_low/T_high - period of the low and high signals
-        
+
         CKDIV = 2, CHDIV and CLDIV = 59
         T_low/T_high = 2.5 microseconds
 
-        Data frequency - 
+        Data frequency -
         f = ((T_low + T_high)^-1)
         f = 200000 Hz 0r 200 kHz
 
@@ -1287,7 +1276,7 @@ Dot Matrix: Blade and R01 EIE_DOTMATRIX accelerometer
 #define EIE_TWI_CWGR_INIT (u32)0x00021D1D
 /*
     31-20 [0] Reserved
-    
+
     19 [0] Reserved
     18 [0] CKDIV
     17 [1] "
@@ -1340,13 +1329,9 @@ Dot Matrix: Blade and R01 EIE_DOTMATRIX accelerometer
     00 [0] TXCOMP - Transmission Completed
 */
 
-
-
-
 #endif /* __CONFIG_H */
 
 /*! @endcond */
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* End of File */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
