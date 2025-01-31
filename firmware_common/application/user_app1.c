@@ -53,6 +53,11 @@ extern volatile u32 G_u32SystemTime1s;     /*!< @brief From main.c */
 extern volatile u32 G_u32SystemFlags;      /*!< @brief From main.c */
 extern volatile u32 G_u32ApplicationFlags; /*!< @brief From main.c */
 
+extern u32 G_u32AntApiCurrentMessageTimeStamp;                           // From ant_api.c
+extern AntApplicationMessageType G_eAntApiCurrentMessageClass;           // From ant_api.c
+extern u8 G_au8AntApiCurrentMessageBytes[ANT_APPLICATION_MESSAGE_BYTES]; // From ant_api.c
+extern AntExtendedDataType G_sAntApiCurrentMessageExtData;               // From ant_api.c
+
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_<type>" and be declared as static.
