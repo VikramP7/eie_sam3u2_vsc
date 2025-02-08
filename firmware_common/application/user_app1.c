@@ -175,7 +175,7 @@ static void UserApp1SM_WaitAntReady(void)
       UserApp1_pfStateMachine = UserApp1SM_Error;
     }
   }
-}
+} /* end UserApp1SM_WaitAntReady() */
 
 static void UserApp1SM_WaitChannelOpen()
 {
@@ -183,12 +183,59 @@ static void UserApp1SM_WaitChannelOpen()
   {
     UserApp1_pfStateMachine = UserApp1SM_ChannelOpen;
   }
-}
+} /* end UserApp1SM_WaitChannelOpen() */
 
 static void UserApp1SM_ChannelOpen()
 {
-  // empty for now
-}
+  static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
+
+  static PixelAddressType sStringLocation;
+  u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
+
+  extern PixelBlockType G_sLcdClearLine7; /* from lcd-NHD-C12864LZ.c*/
+
+  if (AntReadAppMessageBuffer())
+  {
+    if (G_eAntApiCurrentMessageClass == ANT_DATA)
+    {
+      // we have data
+      for (u8 i = 0; i < ANT_DATA_BYTES; i++)
+      {
+        au8DataContent[i * 2] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] / 16);
+        au8DataContent[(i * 2) + 1] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] % 16);
+      }
+
+      sStringLocation.u16PixelColumnAddress = U16_LCD_CENTER_COLUMN - (strlen((char const *)au8DataContent) * (U8_LCD_SMALL_FONT_COLUMNS + U8_LCD_SMALL_FONT_SPACE) / 2);
+      sStringLocation.u16PixelRowAddress = U8_LCD_SMALL_FONT_LINE7;
+      LcdClearPixels(&G_sLcdClearLine7);
+      LcdLoadString(au8DataContent, LCD_FONT_SMALL, &sStringLocation);
+    }
+    else if (G_eAntApiCurrentMessageClass == ANT_TICK)
+    {
+      // Channel period has occured time to send new data
+      // handles button pressing
+      au8TestMessage[0] = 0x00;
+      au8TestMessage[1] = 0x00;
+      au8TestMessage[2] = 0x00;
+      au8TestMessage[3] = 0x00;
+      if (IsButtonPressed(BUTTON0))
+      {
+        au8TestMessage[0] = 0xff;
+      }
+      if (IsButtonPressed(BUTTON1))
+      {
+        au8TestMessage[1] = 0xff;
+      }
+
+      // does mesage counter
+      au8TestMessage[7]++;
+      au8TestMessage[6] += au8TestMessage[7] == 0;
+      au8TestMessage[5] += (au8TestMessage[7] == 0) && (au8TestMessage[6] == 0);
+      // broadcast prepared message
+      AntQueueBroadcastMessage(U8_ANT_CHANNEL_USERAPP, au8TestMessage);
+    }
+  } /* end AntReadAppMessageBuffer()*/
+} /* end UserApp1SM_ChannelOpen() */
 
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
