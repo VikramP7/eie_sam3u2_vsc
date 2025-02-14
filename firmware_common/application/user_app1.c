@@ -188,6 +188,24 @@ static void UserApp1SM_WaitAntReady(void)
   }
 } /* end UserApp1SM_WaitAntReady() */
 
+/* What does this state do? */
+static void UserApp1SM_Idle(void)
+{
+  if (WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+
+    AntOpenChannelNumber(U8_ANT_CHANNEL_USERAPP);
+    LedOff(RED0);
+    LedOff(GREEN0);
+    LedOff(BLUE0);
+    LedBlink(GREEN0, LED_2HZ);
+
+    UserApp1_u32TimeOut = G_u32SystemTime1ms;
+    UserApp1_pfStateMachine = UserApp1SM_WaitChannelOpen;
+  }
+} /* end UserApp1SM_Idle() */
+
 static void UserApp1SM_WaitChannelOpen()
 {
   if (AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) == ANT_OPEN)
@@ -211,6 +229,76 @@ static void UserApp1SM_WaitChannelOpen()
 } /* end UserApp1SM_WaitChannelOpen() */
 
 static void UserApp1SM_ChannelOpen()
+{
+  static u8 u8LastState = 0xff;
+  static u8 au8TickMessage[] = "Event x\n\r";
+
+  static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
+  static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+  static PixelAddressType sStringLocation;
+  u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
+
+  /*Check if button 0 is pressed to close channel*/
+  if (WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+
+    AntCloseChannelNumber(U8_ANT_CHANNEL_USERAPP);
+
+    LedOff(BLUE0);
+    LedBlink(GREEN0, LED_2HZ);
+
+    /*Start a timer for channel close, and change states*/
+    UserApp1_u32TimeOut = G_u32SystemTime1ms;
+    UserApp1_pfStateMachine = UserApp1SM_WaitChannelClose;
+  }
+
+  /*Check if search for master time out has occured*/
+  if (AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) != ANT_OPEN)
+  {
+    u8LastState = 0xff;
+    LedBlink(GREEN0, LED_2HZ);
+    LedOff(BLUE0);
+
+    UserApp1_u32TimeOut = G_u32SystemTime1ms;
+    UserApp1_pfStateMachine = UserApp1SM_WaitChannelClose;
+  }
+
+  if (AntReadAppMessageBuffer())
+  {
+    if (G_eAntApiCurrentMessageClass == ANT_DATA)
+    {
+      UserApp1_u32DataMsgCount++;
+      // we have data
+    } /*end if ant data*/
+    else if (G_eAntApiCurrentMessageClass == ANT_TICK)
+    {
+      UserApp1_u32TickMsgCount++;
+    }
+  } /* end AntReadAppMessageBuffer()*/
+}
+
+static void UserApp1SM_WaitChannelClose()
+{
+  if (AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) == ANT_CLOSED)
+  {
+    LedOff(GREEN0);
+    // turn on yellow
+    LedOn(GREEN0);
+    LedOn(RED0);
+    // go back to idle state after closing channel
+    UserApp1_pfStateMachine = UserApp1SM_Idle;
+  }
+
+  if (IsTimeUp(&UserApp1_u32TimeOut, U32_TIMEOUT_CLOSE_CHANNEL))
+  {
+    LedOff(GREEN0);
+    LedBlink(RED0, LED_4HZ);
+    UserApp1_pfStateMachine = UserApp1SM_Error;
+  }
+}
+
+static void UserApp1SM_ChannelOpenzzz()
 {
   static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
 
@@ -261,24 +349,6 @@ static void UserApp1SM_ChannelOpen()
     }
   } /* end AntReadAppMessageBuffer()*/
 } /* end UserApp1SM_ChannelOpen() */
-
-/* What does this state do? */
-static void UserApp1SM_Idle(void)
-{
-  if (WasButtonPressed(BUTTON0))
-  {
-    ButtonAcknowledge(BUTTON0);
-
-    AntOpenChannelNumber(U8_ANT_CHANNEL_USERAPP);
-    LedOff(RED0);
-    LedOff(GREEN0);
-    LedOff(BLUE0);
-    LedBlink(GREEN0, LED_2HZ);
-
-    UserApp1_u32TimeOut = G_u32SystemTime1ms;
-    UserApp1_pfStateMachine = UserApp1SM_WaitChannelOpen;
-  }
-} /* end UserApp1SM_Idle() */
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */

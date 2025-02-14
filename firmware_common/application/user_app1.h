@@ -60,6 +60,7 @@ Constants / Definitions
 #define U8_ANT_FREQUENCY_USERAPP (u8)50             /* 2400MHz + this number 0 – 99 */
 #define U8_ANT_TX_POWER_USERAPP RADIO_TX_POWER_4DBM /* RADIO_TX_POWER_xxx */
 #define U32_TIMEOUT_OPEN_CHANNEL (u32)5000
+#define U32_TIMEOUT_CLOSE_CHANNEL (u32)2000
 
 #endif /* __USER_APP1_H */
 
