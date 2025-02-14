@@ -143,6 +143,7 @@ void UserApp1Initialize(void)
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
+    LedBlink(RED0, LED_4HZ);
     UserApp1_pfStateMachine = UserApp1SM_Error;
   }
 
