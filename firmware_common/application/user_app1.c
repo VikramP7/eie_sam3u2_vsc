@@ -43,6 +43,10 @@ PROTECTED FUNCTIONS
 Global variable definitions with scope across entire project.
 All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
+
+static u32 UserApp1_u32DataMsgCount = 0; /*ANT_DATA packet counter*/
+static u32 UserApp1_u32TickMsgCount = 0; /*ANT_TICK packet counter*/
+
 /* New variables */
 volatile u32 G_u32UserApp1Flags; /*!< @brief Global state flags */
 
@@ -97,11 +101,14 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  PixelAddressType sStringLocation;
+  u8 au8WelcomeMessage[] = "ANT Slave Demo";
+
   AntAssignChannelInfoType sChannelInfo;
   if (AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) == ANT_UNCONFIGURED)
   {
     sChannelInfo.AntChannel = U8_ANT_CHANNEL_USERAPP;
-    sChannelInfo.AntChannelType = CHANNEL_TYPE_MASTER;
+    sChannelInfo.AntChannelType = CHANNEL_TYPE_SLAVE;
     sChannelInfo.AntChannelPeriodHi = U8_ANT_CHANNEL_PERIOD_HI_USERAPP;
     sChannelInfo.AntChannelPeriodLo = U8_ANT_CHANNEL_PERIOD_LO_USERAPP;
 
@@ -118,7 +125,15 @@ void UserApp1Initialize(void)
     {
       sChannelInfo.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
     }
-  }
+  } /*END radio initilization*/
+
+  LedOn(RED0);
+
+  sStringLocation.u16PixelColumnAddress = U16_LCD_CENTER_COLUMN - (strlen((char const *)au8WelcomeMessage) * (U8_LCD_SMALL_FONT_COLUMNS + U8_LCD_SMALL_FONT_SPACE) / 2);
+  sStringLocation.u16PixelRowAddress = U8_LCD_SMALL_FONT_LINE7;
+
+  LcdClearPixels(&G_sLcdClearLine7);
+  LcdLoadString(&au8WelcomeMessage, LCD_FONT_SMALL, &sStringLocation);
 
   /* If good initialization, set state to Idle */
   if (AntAssignChannel(&sChannelInfo))
@@ -240,7 +255,15 @@ static void UserApp1SM_ChannelOpen()
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+  u8 u8CurrentEventCode = RESPONSE_NO_ERROR;
 
+  if (AntReadAppMessageBuffer())
+  {
+    if (G_eAntApiCurrentMessageClass == ANT_TICK)
+    {
+      u8CurrentEventCode = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
+    }
+  }
 } /* end UserApp1SM_Idle() */
 
 /*-------------------------------------------------------------------------------------------------------------------*/
