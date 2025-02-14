@@ -46,6 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 
 static u32 UserApp1_u32DataMsgCount = 0; /*ANT_DATA packet counter*/
 static u32 UserApp1_u32TickMsgCount = 0; /*ANT_TICK packet counter*/
+static u32 UserApp1_u32TimeOut = 0;
 
 /* New variables */
 volatile u32 G_u32UserApp1Flags; /*!< @brief Global state flags */
@@ -104,6 +105,8 @@ void UserApp1Initialize(void)
   PixelAddressType sStringLocation;
   u8 au8WelcomeMessage[] = "ANT Slave Demo";
 
+  LedOn(RED0); /*Set Status LED to red as ant is unconfigured*/
+
   AntAssignChannelInfoType sChannelInfo;
   if (AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) == ANT_UNCONFIGURED)
   {
@@ -127,8 +130,6 @@ void UserApp1Initialize(void)
     }
   } /*END radio initilization*/
 
-  LedOn(RED0);
-
   sStringLocation.u16PixelColumnAddress = U16_LCD_CENTER_COLUMN - (strlen((char const *)au8WelcomeMessage) * (U8_LCD_SMALL_FONT_COLUMNS + U8_LCD_SMALL_FONT_SPACE) / 2);
   sStringLocation.u16PixelRowAddress = U8_LCD_SMALL_FONT_LINE7;
 
@@ -138,12 +139,13 @@ void UserApp1Initialize(void)
   /* If good initialization, set state to Idle */
   if (AntAssignChannel(&sChannelInfo))
   {
+    LedOn(RED0);
+    LedOn(GREEN0);
     UserApp1_pfStateMachine = UserApp1SM_WaitAntReady;
   }
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
-    LedBlink(RED0, LED_4HZ);
     UserApp1_pfStateMachine = UserApp1SM_Error;
   }
 
@@ -182,14 +184,7 @@ static void UserApp1SM_WaitAntReady(void)
 {
   if (AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) == ANT_CONFIGURED)
   {
-    if (AntOpenChannelNumber(U8_ANT_CHANNEL_USERAPP))
-    {
-      UserApp1_pfStateMachine = UserApp1SM_WaitChannelOpen;
-    }
-    else
-    {
-      UserApp1_pfStateMachine = UserApp1SM_Error;
-    }
+    UserApp1_pfStateMachine = UserApp1SM_Idle;
   }
 } /* end UserApp1SM_WaitAntReady() */
 
@@ -197,7 +192,21 @@ static void UserApp1SM_WaitChannelOpen()
 {
   if (AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) == ANT_OPEN)
   {
+    LedOn(GREEN0);
     UserApp1_pfStateMachine = UserApp1SM_ChannelOpen;
+  }
+
+  if (IsTimeUp(&UserApp1_u32TimeOut, U32_TIMEOUT_OPEN_CHANNEL))
+  {
+    AntCloseChannelNumber(U8_ANT_CHANNEL_USERAPP);
+    // no longer green
+    LedOff(GREEN0);
+
+    // turn on yellow led
+    LedOn(RED0);
+    LedOn(GREEN0);
+
+    UserApp1_pfStateMachine = UserApp1SM_Idle;
   }
 } /* end UserApp1SM_WaitChannelOpen() */
 
@@ -256,14 +265,18 @@ static void UserApp1SM_ChannelOpen()
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-  u8 u8CurrentEventCode = RESPONSE_NO_ERROR;
-
-  if (AntReadAppMessageBuffer())
+  if (WasButtonPressed(BUTTON0))
   {
-    if (G_eAntApiCurrentMessageClass == ANT_TICK)
-    {
-      u8CurrentEventCode = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
-    }
+    ButtonAcknowledge(BUTTON0);
+
+    AntOpenChannelNumber(U8_ANT_CHANNEL_USERAPP);
+    LedOff(RED0);
+    LedOff(GREEN0);
+    LedOff(BLUE0);
+    LedBlink(GREEN0, LED_2HZ);
+
+    UserApp1_u32TimeOut = G_u32SystemTime1ms;
+    UserApp1_pfStateMachine = UserApp1SM_WaitChannelOpen;
   }
 } /* end UserApp1SM_Idle() */
 
@@ -271,7 +284,7 @@ static void UserApp1SM_Idle(void)
 /* Handle an error */
 static void UserApp1SM_Error(void)
 {
-  LedOn(RED0);
+  LedBlink(RED0, LED_4HZ);
 } /* end UserApp1SM_Error() */
 
 /*--------------------------------------------------------------------------------------------------------------------*/

@@ -59,6 +59,7 @@ Constants / Definitions
 #define U8_ANT_CHANNEL_PERIOD_HI_USERAPP (u8)0x20   /* High byte of two-byte channel period */
 #define U8_ANT_FREQUENCY_USERAPP (u8)50             /* 2400MHz + this number 0 – 99 */
 #define U8_ANT_TX_POWER_USERAPP RADIO_TX_POWER_4DBM /* RADIO_TX_POWER_xxx */
+#define U32_TIMEOUT_OPEN_CHANNEL (u32)5000
 
 #endif /* __USER_APP1_H */
 
