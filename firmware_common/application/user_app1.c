@@ -63,6 +63,8 @@ extern AntApplicationMessageType G_eAntApiCurrentMessageClass;           // From
 extern u8 G_au8AntApiCurrentMessageBytes[ANT_APPLICATION_MESSAGE_BYTES]; // From ant_api.c
 extern AntExtendedDataType G_sAntApiCurrentMessageExtData;               // From ant_api.c
 
+extern PixelBlockType G_sLcdClearLine7; /* from lcd-NHD-C12864LZ.c*/
+
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_<type>" and be declared as static.
@@ -303,14 +305,7 @@ static void UserApp1SM_ChannelOpen()
         sStringLocation.u16PixelColumnAddress = U16_LCD_CENTER_COLUMN - (strlen((char const *)au8DataContent) * (U8_LCD_SMALL_FONT_COLUMNS + U8_LCD_SMALL_FONT_SPACE) / 2);
         sStringLocation.u16PixelRowAddress = U8_LCD_SMALL_FONT_LINE7;
 
-        static PixelBlockType G_sLcdClearLine7Mi =
-            {
-                .u16RowStart = U8_LCD_SMALL_FONT_LINE7,
-                .u16ColumnStart = 0,
-                .u16RowSize = U8_LCD_SMALL_FONT_ROWS,
-                .u16ColumnSize = U16_LCD_COLUMNS};
-
-        LcdClearPixels(&G_sLcdClearLine7Mi);
+                LcdClearPixels(&G_sLcdClearLine7);
         LcdLoadString(&au8DataContent, LCD_FONT_SMALL, &sStringLocation);
 
         // update our local message counter and send the message back
