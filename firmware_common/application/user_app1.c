@@ -76,6 +76,7 @@ Function Definitions
 static void UserApp1SM_WaitAntReady();
 static void UserApp1SM_ChannelOpen();
 static void UserApp1SM_WaitChannelOpen();
+static void UserApp1SM_WaitChannelClose();
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /*! @publicsection */
@@ -133,7 +134,14 @@ void UserApp1Initialize(void)
   sStringLocation.u16PixelColumnAddress = U16_LCD_CENTER_COLUMN - (strlen((char const *)au8WelcomeMessage) * (U8_LCD_SMALL_FONT_COLUMNS + U8_LCD_SMALL_FONT_SPACE) / 2);
   sStringLocation.u16PixelRowAddress = U8_LCD_SMALL_FONT_LINE7;
 
-  LcdClearPixels(&G_sLcdClearLine7);
+  static PixelBlockType G_sLcdClearLine7Mi =
+      {
+          .u16RowStart = U8_LCD_SMALL_FONT_LINE7,
+          .u16ColumnStart = 0,
+          .u16RowSize = U8_LCD_SMALL_FONT_ROWS,
+          .u16ColumnSize = U16_LCD_COLUMNS};
+
+  LcdClearPixels(&G_sLcdClearLine7Mi);
   LcdLoadString(&au8WelcomeMessage, LCD_FONT_SMALL, &sStringLocation);
 
   /* If good initialization, set state to Idle */
@@ -141,6 +149,7 @@ void UserApp1Initialize(void)
   {
     LedOn(RED0);
     LedOn(GREEN0);
+    LedOff(BLUE0);
     UserApp1_pfStateMachine = UserApp1SM_WaitAntReady;
   }
   else
@@ -237,6 +246,7 @@ static void UserApp1SM_ChannelOpen()
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
   static PixelAddressType sStringLocation;
   u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
+  bool bGotNewData;
 
   /*Check if button 0 is pressed to close channel*/
   if (WasButtonPressed(BUTTON0))
@@ -268,12 +278,95 @@ static void UserApp1SM_ChannelOpen()
   {
     if (G_eAntApiCurrentMessageClass == ANT_DATA)
     {
-      UserApp1_u32DataMsgCount++;
       // we have data
+      LedOff(GREEN0);
+      LedOn(BLUE0);
+      u8LastState = 0xff;
+      UserApp1_u32DataMsgCount++;
+
+      bGotNewData = FALSE;
+      for (u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
+      {
+        if (G_au8AntApiCurrentMessageBytes[i] != au8LastAntData[i])
+        {
+          bGotNewData = TRUE;
+          au8LastAntData[i] = G_au8AntApiCurrentMessageBytes;
+
+          au8DataContent[2 * i] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] / 16);
+          au8DataContent[2 * i + 1] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] % 16);
+        }
+      }
+
+      if (bGotNewData)
+      {
+        // display to screen
+        sStringLocation.u16PixelColumnAddress = U16_LCD_CENTER_COLUMN - (strlen((char const *)au8DataContent) * (U8_LCD_SMALL_FONT_COLUMNS + U8_LCD_SMALL_FONT_SPACE) / 2);
+        sStringLocation.u16PixelRowAddress = U8_LCD_SMALL_FONT_LINE7;
+
+        static PixelBlockType G_sLcdClearLine7Mi =
+            {
+                .u16RowStart = U8_LCD_SMALL_FONT_LINE7,
+                .u16ColumnStart = 0,
+                .u16RowSize = U8_LCD_SMALL_FONT_ROWS,
+                .u16ColumnSize = U16_LCD_COLUMNS};
+
+        LcdClearPixels(&G_sLcdClearLine7Mi);
+        LcdLoadString(&au8DataContent, LCD_FONT_SMALL, &sStringLocation);
+
+        // update our local message counter and send the message back
+        au8TestMessage[7]++;
+        if (au8TestMessage[7] == 0)
+        {
+          au8TestMessage[6]++;
+          if (au8TestMessage[6] == 0)
+          {
+            au8TestMessage[5]++;
+          }
+        }
+        // AntQueueBroadcastMessage(U8_ANT_CHANNEL_USERAPP, au8TestMessage);
+      }
     } /*end if ant data*/
     else if (G_eAntApiCurrentMessageClass == ANT_TICK)
     {
+      // update tick counter
       UserApp1_u32TickMsgCount++;
+
+      // check if the state is new and therfore worth responding to
+      if (u8LastState != G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX])
+      {
+
+        // new state therefore update last state
+        u8LastState = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
+        au8TickMessage[6] = HexToASCIICharUpper(u8LastState);
+        DebugPrintf(au8TickMessage);
+
+        // parse last state event code:
+        switch (u8LastState)
+        {
+        case RESPONSE_NO_ERROR:
+          // no need to do anthing
+          LedOn(RED1);
+          break;
+        // paired but missing messages blue blinks
+        case EVENT_RX_FAIL:
+          LedOff(GREEN0);
+          LedOff(RED0);
+          LedBlink(BLUE0, LED_2HZ);
+          break;
+        // Drop to search LED is green
+        case EVENT_RX_FAIL_GO_TO_SEARCH:
+          LedOff(RED0);
+          LedOff(BLUE0);
+          LedOn(GREEN0);
+          break;
+        case EVENT_RX_SEARCH_TIMEOUT:
+          DebugPrintf("Search Timeout\r\n");
+          break;
+        default:
+          DebugPrintf("unexpected event\r\n");
+          break;
+        } /*END switch(au8LastState)*/
+      } /*end if */
     }
   } /* end AntReadAppMessageBuffer()*/
 }
@@ -293,6 +386,7 @@ static void UserApp1SM_WaitChannelClose()
   if (IsTimeUp(&UserApp1_u32TimeOut, U32_TIMEOUT_CLOSE_CHANNEL))
   {
     LedOff(GREEN0);
+    LedOff(BLUE0);
     LedBlink(RED0, LED_4HZ);
     UserApp1_pfStateMachine = UserApp1SM_Error;
   }
